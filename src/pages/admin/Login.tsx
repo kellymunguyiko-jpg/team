@@ -134,9 +134,7 @@ export default function Login() {
           onClick={enterGuest}
           className="clay-btn-secondary w-full py-3.5 text-sm flex items-center justify-center gap-2"
         >
-          <Unlock className="h-4 w-4" />
-          Enter as Guest Admin
-        </button>
+          
 
         <p className="text-center mt-6 text-sm font-medium text-violet-500">
           <Link to="/" className="hover:text-violet-800 transition-colors">
