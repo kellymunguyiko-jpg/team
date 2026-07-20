@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Lock, Mail, Sparkles, AlertCircle, Unlock } from "lucide-react";
+import { Lock, Mail, Sparkles, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
@@ -17,26 +17,12 @@ export default function Login() {
     }
   }, [user, authLoading, navigate]);
 
-  const enterGuest = () => {
-    try {
-      localStorage.setItem("clayteam_guest_admin", "1");
-    } catch {
-      /* ignore */
-    }
-    navigate("/admin", { replace: true });
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       await login(email, password);
-      try {
-        localStorage.removeItem("clayteam_guest_admin");
-      } catch {
-        /* ignore */
-      }
       navigate("/admin", { replace: true });
     } catch (err: unknown) {
       const msg =
@@ -44,11 +30,16 @@ export default function Login() {
       if (msg.includes("invalid-credential") || msg.includes("wrong-password")) {
         setError("Invalid email or password.");
       } else if (msg.includes("user-not-found")) {
-        setError("No admin user found. Create one in Firebase Auth, or use Guest Admin.");
+        setError("No admin user found. Create one in Firebase Authentication.");
       } else if (msg.includes("too-many-requests")) {
         setError("Too many attempts. Try again later.");
-      } else if (msg.includes("operation-not-allowed") || msg.includes("configuration-not-found")) {
-        setError("Email/Password not enabled. Enable it in Firebase Auth, or use Guest Admin below.");
+      } else if (
+        msg.includes("operation-not-allowed") ||
+        msg.includes("configuration-not-found")
+      ) {
+        setError(
+          "Email/Password not enabled. Enable it in Firebase Console → Authentication."
+        );
       } else {
         setError(
           msg.replace("Firebase: ", "").replace(/\(auth\/.*\)\.?/, "").trim() ||
@@ -72,7 +63,7 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-extrabold text-violet-950">Admin Login</h1>
           <p className="text-sm text-violet-600/70 font-medium">
-            Sign in or use Guest Admin (open Firebase rules)
+            Sign in with your Firebase admin account
           </p>
         </div>
 
@@ -123,19 +114,6 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-violet-200" />
-          <span className="text-xs font-bold text-violet-400">OR</span>
-          <div className="h-px flex-1 bg-violet-200" />
-        </div>
-
-        <button
-          type="button"
-          onClick={enterGuest}
-          className="clay-btn-secondary w-full py-3.5 text-sm flex items-center justify-center gap-2"
-        >
-          
-
         <p className="text-center mt-6 text-sm font-medium text-violet-500">
           <Link to="/" className="hover:text-violet-800 transition-colors">
             ← Back to website
@@ -143,14 +121,12 @@ export default function Login() {
         </p>
 
         <div className="mt-6 clay-inset p-3 text-xs text-violet-500/80 font-medium leading-relaxed space-y-2">
-          <p className="font-bold text-violet-700">Publish rules in Firebase Console:</p>
+          <p className="font-bold text-violet-700">Firebase setup:</p>
           <p>
-            1. <strong>Firestore → Rules</strong> → paste from <code>firestore.rules</code> → Publish
+            1. Authentication → Sign-in method → enable <strong>Email/Password</strong>
           </p>
-          <p>
-            2. <strong>Storage → Rules</strong> → paste from <code>storage.rules</code> → Publish
-          </p>
-          <p>3. Enable Storage if needed (Storage → Get started)</p>
+          <p>2. Authentication → Users → Add user (email + password)</p>
+          <p>3. Publish Firestore & Storage rules from project files</p>
         </div>
       </div>
     </div>
